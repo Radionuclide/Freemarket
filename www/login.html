@@ -1,0 +1,54 @@
+
+<?php
+include 'common.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if (!empty($_POST['email']) && !empty($_POST['password'])) {
+		global $dbh;
+		$q = "SELECT id FROM users WHERE email = '".$_POST['email']."' AND password = '".hash('whirlpool', $_POST['password'])."'";
+		$sth = $dbh->query($q);
+		$r = $sth->fetch(PDO::FETCH_ASSOC);
+		if(!empty($r)) {
+			$sessionhash = substr( md5(random_bytes(10)), 0, 40);
+			setcookie('SessionHash', $sessionhash);
+			setcookie('id', $r['id']);
+			$sth = $dbh->query("UPDATE freemarket.users SET sessionhash='".$sessionhash."' WHERE id='".$r['id']."';");
+  			header('Refresh: 0; URL=index.html');
+		} else {
+			echo "Нет такого юзера или пароль неправильный";
+		}
+
+		$dbh = null;
+		$sth = null;
+	} else
+		echo "Заполните все поля";
+}
+?>
+
+
+<html>
+<body>
+
+<h1> Freemarket </h1>
+<br>
+<br>
+Вход
+<form method="POST" >
+	<label for="email">
+	    email: 
+	</label>
+	<input type="text" name="email">
+	<br>
+	<label for="password">
+	    Пароль: 
+	</label>
+	<input type="text" name="password">
+	<input type="submit" name="okbutton" value="OK">
+</form>
+<a href="/registration.html">Регистрация</a>
+<a href="/personal.html">Личный кабинет</a>
+</body>
+</html
+
+
+

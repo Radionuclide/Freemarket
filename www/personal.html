@@ -1,0 +1,57 @@
+<?php
+	include 'common.php';
+	if (!$is_logged)
+	  	header('Refresh: 0; URL=index.html');
+	Page_top();
+
+	$r = $dbh->query("SELECT blocked FROM users WHERE id = $userId")->fetch();
+	if ($r['blocked'] == 0) {
+		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_logged) {
+			$dbh->query("UPDATE users SET name = '".$_POST['name'].
+			 "', email = '".$_POST['email'].
+			 (!empty($_POST['password']) ? "', password = '".hash('whirlpool', $_POST['password']) : "").
+			 "', address = '".$_POST['address'].
+			 "', about = '".$_POST['about'].
+			 "', phone = '".$_POST['phone'].
+			 "'  WHERE id = '".$userId."'");
+		}
+		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_FILES["photo"]["error"] == 0 && $is_logged) {
+			if($_FILES['photo']['size'] <= 16*1024*1024 && $_FILES['photo']['type'] == 'image/jpeg') {
+				$name = $userId.".jpeg";
+	    		move_uploaded_file($_FILES["photo"]["tmp_name"], $_SERVER["DOCUMENT_ROOT"]."/".$name);
+	    		$dbh->query("UPDATE users SET photo = '".$name."' WHERE id = '".$userId."'");
+			}
+		}
+
+		$r = $dbh->query("SELECT * FROM users WHERE id = '".$userId."'")->fetch(PDO::FETCH_ASSOC);
+		echo "
+			<form method=\"POST\" enctype=\"multipart/form-data\">
+				<label for=\"email\">email:</label>
+				<input type=\"text\" name=\"email\" value=\"{$r['email']}\">
+				<br>
+				<label for=\"name\">ФИО:</label>
+				<input type=\"text\" name=\"name\" value=\"{$r['name']}\">
+				<br>
+				<label for=\"password\">Пароль:</label>
+				<input type=\"text\" name=\"password\">
+				<br>
+				<label for=\"address\">Адрес:</label>
+				<input type=\"text\" name=\"address\" value=\"{$r['address']}\">
+				<br>
+				<label for=\"about\">О себе:</label>
+				<input type=\"text\" name=\"about\" value=\"{$r['about']}\">
+				<br>
+				<label for=\"phone\">Номер телефона:</label>
+				<input type=\"text\" name=\"phone\" value=\"{$r['phone']}\">
+				<br>
+				<label for=\"photo\">Загрузить фото:</label>
+				<input type=\"file\" name=\"photo\">
+				<br>
+				<input type=\"submit\" name = \"Upload_photo\" value=\"Обновить мои данные\">
+			</form>
+		";
+	} else {
+		echo "Ваш аккаунт заблокирован";
+	}
+
+?>

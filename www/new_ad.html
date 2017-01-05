@@ -1,0 +1,47 @@
+<?php
+	include 'common.php';
+	if (!$is_logged)
+	  	header('Refresh: 0; URL=index.html');
+	Page_top();
+
+	$r = $dbh->query("SELECT blocked FROM users WHERE id = $userId")->fetch();
+	if ($r['blocked'] == 0) {
+		echo "
+		<form method=\"post\" enctype=\"multipart/form-data\"><p>
+
+			<label for=\"description\">Описание:</label>
+			<textarea name=\"description\"></textarea>
+			<Br>
+			<label for=\"want\">Хочу взамен:</label>
+			<textarea name=\"want\"></textarea>
+			<Br>
+			<label for=\"photo\">Загрузить фото:</label>
+			<input type=\"file\" name=\"photo\">
+			<Br>
+			<input type=\"checkbox\" name=\"showphone\" checked>Показывать телефон<Br>
+			<input type=\"checkbox\" name=\"showemail\">Показывать email<Br>
+			<input type=\"checkbox\" name=\"showaddress\">Показывать адрес<Br></p>
+			<p><input type=\"submit\" value=\"Отправить\"></p>
+		</form>";
+
+		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_logged) {
+			//проверка
+			$description = $_POST["description"];
+			$want = $_POST["want"];
+			$showphone = (isset($_POST["showphone"]) ? 1 : 0);
+			$showemail = (isset($_POST["showemail"]) ? 1 : 0);
+			$showaddress = (isset($_POST["showaddress"]) ? 1 : 0);
+			$photo = null;
+			if ($_FILES["photo"]["error"] == 0) {
+				if($_FILES['photo']['size'] <= 16*1024*1024 && $_FILES['photo']['type'] == 'image/jpeg') {
+					$r = $dbh->query("SELECT MAX(counter) FROM ads")->fetch();
+					$photo = $userId."_".$r[0].".jpg";
+		    		move_uploaded_file($_FILES["photo"]["tmp_name"], $_SERVER["DOCUMENT_ROOT"]."/".$photo);
+				}
+			}
+			$dbh->query("INSERT INTO ads SET description = '".$description."', want = '".$want."', photo = '".$photo."', showphone = $showphone, showemail = $showemail, showaddress = $showaddress, id = $userId, active = 1");
+		}
+	} else {
+		echo "Ваш аккаунт заблокирован";
+	}
+?>

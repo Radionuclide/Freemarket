@@ -1,0 +1,31 @@
+<?php
+	include 'common.php';
+	Page_top();
+	
+	$number_ads = 10;
+	$page = isset($_GET['page']) ? $_GET['page'] : 0;
+	$ads = $dbh->query("SELECT ads.photo, description, want, ads.id, showphone, showemail, showaddress, counter  FROM ads INNER JOIN users ON ads.id = users.id WHERE active = 1 AND blocked = 0")->fetchAll(PDO::FETCH_ASSOC);
+	for($i = $page*$number_ads; $i < min(($page+1)*$number_ads, count($ads)); $i++) {
+		echo "===========================<br>";
+		echo "
+		{$ads[$i]['description']}<br>".
+		($ads[$i]['photo'] == '' ? '' : "<img width=\"200\" src = ".$ads[$i]["photo"]." ><br>")
+		."Хочу {$ads[$i]['want']}<br>";
+		$r = $dbh->query("SELECT * FROM users WHERE id = ".$ads[$i]['id'])->fetchAll(PDO::FETCH_ASSOC)[0];
+		if ($ads[$i]['showphone']) echo "Мой телефон: ".$r['phone']."<br>";
+		if ($ads[$i]['showemail']) echo "Моя почта: ".$r['email']."<br>";
+		if ($ads[$i]['showaddress']) echo "Мой адрес: ".$r['address']."<br>";
+		echo "<a href=\"/complaint.html?counter={$ads[$i]['counter']}\"><small>Пожаловаться модератору</small></a><br>";
+	}
+	if ($page == 0)
+		echo "<h1><a href=\"/index.html?page=1\">-></a></h1>";
+	else if (($page+1)*$number_ads < count($ads)) {
+		$p1 = $page-1;
+		$p2 = $page+1;
+		echo "<br><h1><a href=\"/index.html?page={$p1}\"><-</a><a href=\"/index.html?page={$p2}\">-></a></h1>";
+	} else {
+		$p1 = $page-1;
+		echo "<br><h1><a href=\"/index.html?page={$p1}\"><-</a></h1>";
+	}
+
+?>

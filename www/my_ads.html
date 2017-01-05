@@ -1,0 +1,23 @@
+<?php
+	include 'common.php';
+	if (!$is_logged)
+	  	header('Refresh: 0; URL=index.html');
+	Page_top();
+
+
+	if ($is_logged)
+		foreach ($dbh->query("SELECT * FROM ads")->fetchAll(PDO::FETCH_ASSOC) as $ad) {
+			echo "===========================<br>";
+			echo "
+			{$ad['description']}<br>".
+			($ad['photo'] == '' ? '' : "<img width=\"200\" src = ".$ad["photo"]." ><br>")
+			."Хочу {$ad['want']}<br>";
+			$r = $dbh->query("SELECT * FROM users WHERE id = ".$ad['id'])->fetchAll(PDO::FETCH_ASSOC)[0];
+			print_r($ad['photo']); 
+			echo "<br><br>";
+			if ($ad['showphone']) 	echo "Показывать телефон<br>"; 	else echo "Не показывать телефон<br>";
+			if ($ad['showemail']) 	echo "Показывать email<br>"; 	else echo "Не показывать email<br>";
+			if ($ad['showaddress']) echo "Показывать адрес<br>";	else echo "Не показывать адрес<br>";
+			echo "<a href=\"/edit_ad.html?counter={$ad['counter']}\">Редактировать</a><br>";
+		}
+?>

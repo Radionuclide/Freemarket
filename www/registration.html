@@ -1,0 +1,47 @@
+<html>
+<body>
+
+<?php
+include 'common.php';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if (!empty($_POST['name']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['password2'])) 
+		if ($_POST['password'] == $_POST['password2']) {
+			global $dbh;
+			$q = "INSERT INTO users(name, email, password) VALUES ('".$_POST['name']."', '".$_POST['email']."', '".hash('whirlpool', $_POST['password'])."')";
+			$sth = $dbh->query($q);
+			$dbh = null;
+			$sth = null;
+	  		header('Refresh: 0; URL=index.html');
+		} else 
+			echo "Пароли не совпадают";		
+	else
+		echo "Заполните все поля";
+}
+?>
+
+
+
+<h1> Freemarket </h1>
+<br>
+<br>
+Регистрация
+<form method="POST" >
+	<label for="name">
+	    ФИО: 
+	</label>
+	<input type="text" name="name">
+	<br>
+	email:<input type="text" name="email">
+	<br>
+	Пароль:<input type="text" name="password">
+	<br>
+	Повторите пароль:<input type="text" name="password2">
+	<br>
+	<input type="submit" name="okbutton" value="OK">
+</form>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,15 @@
+<?php
+	include 'common.php';
+		Page_top();
+	$is_admin = $dbh->query("SELECT admin FROM users WHERE id = $userId")->fetch()[0];
+	if ($is_logged && $is_admin) { //???
+		$counter = $_GET['counter'];
+		$complaints = $dbh->query("SELECT text FROM complaints WHERE ad_counter = $counter")->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($complaints as $r) {
+			echo "
+			=====================================<br>
+			{$r['text']}<br>
+			";
+		}
+	}
+?>

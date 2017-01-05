@@ -1,0 +1,15 @@
+<?php
+	include 'common.php';
+	Page_top();
+
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		$ad_counter = $_GET['counter'];
+		$text = $_POST['complaint_text'];
+		$dbh->query("INSERT INTO complaints SET ad_counter = '$ad_counter', text = '$text'");
+	}
+?>
+
+<form method='POST'><p>
+	<textarea name=complaint_text >Описание жалобы</textarea><br>
+	<p><input type=submit value=Отправить></p>
+</form>

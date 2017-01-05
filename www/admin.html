@@ -1,0 +1,36 @@
+<?php
+	include 'common.php';
+	Page_top();
+	$is_admin = $dbh->query("SELECT admin FROM users WHERE id = $userId")->fetch()[0];
+	if ($is_logged && $is_admin) { //???
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+			//как сделать по-нормальному?
+			$id = array_search('Блокировать', $_POST);
+			if ($id != 0)
+				$dbh->query("UPDATE users SET blocked = 1 WHERE id = $id");
+			$id = array_search('Разблокировать', $_POST);
+			if ($id != 0)
+				$dbh->query("UPDATE users SET blocked = 0 WHERE id = $id");
+		}
+		echo "<a href=\"/admin_ads.html\">Объявления</a><br>";
+		$users = $dbh->query("SELECT * FROM users")->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($users as $r) {
+			echo "
+			=====================================<br>
+			";
+			if ($r["photo"] != '')
+				echo "<img width=\"100\" src = ".$r["photo"]." ><br>";
+			echo "
+			ФИО: {$r['name']} <br>
+			email: {$r['email']} <br>
+			О себе: {$r['about']} <br>
+			Телефон: {$r['phone']} <br>
+			Адрес: {$r['address']} <br>
+			";
+			if ($r['blocked'] == 0)
+				echo "<form method=\"POST\"><p><input type=\"submit\"  name = \"{$r['id']}\" value=\"Блокировать\"></p></form>";
+			else
+				echo "<form method=\"POST\"><p><input type=\"submit\"  name = \"{$r['id']}\" value=\"Разблокировать\"></p></form>";
+		}
+	}
+?>

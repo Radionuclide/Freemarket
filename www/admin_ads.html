@@ -1,0 +1,29 @@
+<?php
+	include 'common.php';
+	Page_top();
+	$is_admin = $dbh->query("SELECT admin FROM users WHERE id = $userId")->fetch()[0];
+	if ($is_logged && $is_admin) { //???
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+			//как сделать по-нормальному?
+			$counter = array_search('Деактивировать объявление', $_POST);
+			if ($counter != 0)
+				$dbh->query("UPDATE ads SET active = 0 WHERE counter = $counter");
+		}
+
+		$ads = $dbh->query("SELECT photo, description, want, counter, id, COUNT(ad_counter) AS complaints_number FROM ads LEFT JOIN complaints ON counter = ad_counter GROUP BY ad_counter ORDER BY complaints_number")->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($ads as $r) {
+			echo "
+			=====================================<br>
+			";
+			if ($r["photo"] != '')
+				echo "<img width=\"100\" src = ".$r["photo"]." ><br>";
+			echo "
+			Описание: {$r['description']} <br>
+			Хочу взамен: {$r['want']} <br>
+			Количество жалоб: {$r['complaints_number']} <br>
+			<a href=\"/admin_complaints.html/?counter={$r['counter']}\">Посмотреть жалобы</a>)<br>
+			<form method=\"POST\"><p><input type=\"submit\"  name = \"{$r['counter']}\" value=\"Деактивировать объявление\"></p></form>
+			";
+		}
+	}
+?>
